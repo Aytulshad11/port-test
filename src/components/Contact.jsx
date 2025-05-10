@@ -9,7 +9,7 @@ const Contact = () => {
   });
   
   const [submitted, setSubmitted] = useState(false);
-  
+  const [responseMessage, setResponseMessage] = useState();
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -18,27 +18,61 @@ const Contact = () => {
     }));
   };
   
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  
+  //   try {
+  //     const response = await fetch(import.meta.env.VITE_CONTACT_API, {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json'
+  //       },
+  //       body: JSON.stringify(formData)
+  //     });
+  
+  //     if (response.ok) {
+  //       console.log('Form submitted:', formData);
+  //       setSubmitted(true);
+  //       setFormData({ name: '', email: '', message: '' });
+  //     } else {
+  //       console.error('Failed to send message');
+  //     }
+  //   } catch (error) {
+  //     console.error('Error submitting form:', error);
+  //   }
+  // };
   const handleSubmit = async (e) => {
     e.preventDefault();
+  
+    if (!formData.name || !formData.email || !formData.message) {
+      setResponseMessage('Please fill in all fields.');
+      return;
+    }
+  
+    setSubmitted(true);
   
     try {
       const response = await fetch(import.meta.env.VITE_CONTACT_API, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(formData)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+        mode: 'cors'
       });
   
+      const data = await response.json();
+  
       if (response.ok) {
-        console.log('Form submitted:', formData);
-        setSubmitted(true);
+        //setResponseMessage('Message sent successfully!');
         setFormData({ name: '', email: '', message: '' });
-      } else {
-        console.error('Failed to send message');
-      }
+       } 
+       //else {
+      //   setResponseMessage(data.message || 'Something went wrong.');
+      // }
     } catch (error) {
-      console.error('Error submitting form:', error);
+      console.error(error);
+      setResponseMessage('Failed to send message. Try again later.');
+    } finally {
+      setSubmitted(false);
     }
   };
   
